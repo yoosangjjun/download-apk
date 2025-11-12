@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>오프아웃 APK 다운로드</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 10px;
+        line-height: 1.4;
+      }
+
+      .container {
+        max-width: 100%;
+        margin: 0 auto;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+      }
+
+      .header {
+        background: linear-gradient(45deg, #4caf50, #45a049);
+        color: white;
+        padding: 20px 15px;
+        text-align: center;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .header h1 {
+        font-size: 24px;
+        margin-bottom: 8px;
+      }
+
+      .header p {
+        font-size: 14px;
+        opacity: 0.9;
+      }
+
+      .content {
+        padding: 15px;
+      }
+
+      /* 탭 메뉴 스타일 */
+      .tab-container {
+        margin: 20px 0;
+      }
+
+      .tab-buttons {
+        display: flex;
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 4px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .tab-btn {
+        flex: 1;
+        padding: 12px 20px;
+        border: none;
+        background: transparent;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        color: #666;
+        position: relative;
+      }
+
+      .tab-btn.active {
+        background: linear-gradient(45deg, #4caf50, #45a049);
+        color: white;
+        box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+      }
+
+      .tab-btn:not(.active):hover {
+        background: rgba(76, 175, 80, 0.1);
+        color: #4caf50;
+      }
+
+      .tab-content {
+        display: none;
+      }
+
+      .tab-content.active {
+        display: block;
+        animation: fadeInTab 0.3s ease-out;
+      }
+
+      @keyframes fadeInTab {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* 환경 표시 배지 */
+      .env-badge {
+        display: inline-block;
+        background: #e3f2fd;
+        color: #1976d2;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-left: 8px;
+      }
+
+      .env-badge.dev {
+        background: #fff3e0;
+        color: #f57c00;
+      }
+
+      .env-badge.stg {
+        background: #e8f5e8;
+        color: #2e7d32;
+      }
+
+      .stats {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 10px;
+        text-align: center;
+        margin: 15px 0;
+      }
+
+      .stats h3 {
+        color: #333;
+        font-size: 20px;
+        margin-bottom: 5px;
+      }
+
+      .stats p {
+        color: #666;
+        font-size: 14px;
+      }
+
+      .app-list {
+        margin: 20px 0;
+      }
+
+      .app-item {
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 12px;
+        margin-bottom: 15px;
+        padding: 15px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+      }
+
+      .app-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+      }
+
+      .app-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+
+      .app-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(45deg, #4caf50, #45a049);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 24px;
+        margin-right: 15px;
+        flex-shrink: 0;
+      }
+
+      .app-info {
+        flex: 1;
+      }
+
+      .app-info h3 {
+        color: #333;
+        font-size: 18px;
+        margin-bottom: 4px;
+        font-weight: 600;
+      }
+
+      .app-info p {
+        color: #666;
+        font-size: 14px;
+      }
+
+      .app-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-bottom: 15px;
+      }
+
+      .detail-item {
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 8px;
+        text-align: center;
+      }
+
+      .detail-label {
+        color: #666;
+        font-size: 12px;
+        margin-bottom: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .detail-value {
+        color: #333;
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      .version-badge {
+        background: #e3f2fd;
+        color: #1976d2;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .download-btn {
+        background: linear-gradient(45deg, #4caf50, #45a049);
+        color: white;
+        padding: 12px;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        width: 100%;
+      }
+
+      .download-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+      }
+
+      .download-btn::before {
+        content: "⬇️";
+        margin-right: 8px;
+        font-size: 18px;
+      }
+
+      .warning {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        color: #856404;
+        padding: 15px;
+        border-radius: 10px;
+        margin: 20px 0;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .warning::before {
+        content: "⚠️ ";
+        font-size: 16px;
+      }
+
+      /* 아주 작은 화면 (320px 이하) */
+      @media (max-width: 320px) {
+        .container {
+          margin: 5px;
+          border-radius: 10px;
+        }
+
+        .header {
+          padding: 15px 10px;
+        }
+
+        .header h1 {
+          font-size: 20px;
+        }
+
+        .content {
+          padding: 10px;
+        }
+
+        .app-item {
+          padding: 12px;
+        }
+
+        .app-icon {
+          width: 40px;
+          height: 40px;
+          font-size: 20px;
+          margin-right: 12px;
+        }
+
+        .app-info h3 {
+          font-size: 16px;
+        }
+
+        .app-details {
+          grid-template-columns: 1fr;
+          gap: 10px;
+        }
+      }
+
+      /* 가로 화면 최적화 */
+      @media (orientation: landscape) and (max-height: 500px) {
+        .header {
+          padding: 15px;
+        }
+
+        .header h1 {
+          font-size: 20px;
+          margin-bottom: 5px;
+        }
+
+        .content {
+          padding: 10px;
+        }
+
+        .app-item {
+          margin-bottom: 10px;
+          padding: 12px;
+        }
+      }
+
+      /* 헤더 버튼들 공통 스타일 */
+      .header-btn {
+        position: absolute;
+        top: 15px;
+        background: rgba(255, 255, 255, 0.2);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 25px;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 20px;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+      }
+
+      .header-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(1.1);
+      }
+
+      .header-btn:active {
+        transform: scale(0.95);
+      }
+
+      /* 새로고침 버튼 */
+      .refresh-btn {
+        left: 15px;
+      }
+
+      .refresh-btn:hover {
+        animation: rotateRefresh 0.6s ease-in-out;
+      }
+
+      @keyframes rotateRefresh {
+        0% {
+          transform: rotate(0deg) scale(1.1);
+        }
+        100% {
+          transform: rotate(360deg) scale(1.1);
+        }
+      }
+
+      /* 다크모드 토글 버튼 */
+      .theme-toggle {
+        right: 15px;
+      }
+
+      /* 공유 버튼 제거됨 */
+
+      /* 헤더 텍스트 영역 */
+      .header-content {
+        flex: 1;
+        /* 좌측 새로고침 버튼(≈65px)과 우측 테마 버튼(≈65px) 영역 확보 */
+        margin: 0 84px 0 70px;
+        /* 플렉스 수축 시 내용 오버플로 방지 */
+        min-width: 0;
+      }
+
+      /* 작은 화면에서 타이포/버튼 크기 및 여백 최적화 */
+      @media (max-width: 420px) {
+        .header h1 {
+          font-size: 20px;
+        }
+        .header p {
+          font-size: 12px;
+        }
+        .header-btn {
+          width: 44px;
+          height: 44px;
+          top: 12px;
+        }
+        .header-content {
+          margin: 0 84px 0 64px;
+        }
+      }
+
+      @media (max-width: 360px) {
+        .header h1 {
+          font-size: 18px;
+        }
+        .header p {
+          font-size: 11px;
+        }
+        .header-btn {
+          width: 40px;
+          height: 40px;
+          top: 10px;
+        }
+        .header-content {
+          margin: 0 80px 0 56px;
+        }
+      }
+
+      /* 다크모드 스타일 */
+      .dark-mode {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      }
+
+      .dark-mode .container {
+        background: #2a2a2a;
+        color: #ffffff;
+      }
+
+      .dark-mode .app-item {
+        background: #3a3a3a;
+        border-color: #505050;
+        color: #ffffff;
+      }
+
+      .dark-mode .app-info h3 {
+        color: #ffffff;
+      }
+
+      .dark-mode .app-info p {
+        color: #cccccc;
+      }
+
+      .dark-mode .detail-item {
+        background: #2a2a2a;
+      }
+
+      .dark-mode .detail-value {
+        color: #ffffff;
+      }
+
+      .dark-mode .detail-label {
+        color: #aaaaaa;
+      }
+
+      .dark-mode .stats {
+        background: #3a3a3a;
+        color: #ffffff;
+      }
+
+      .dark-mode .stats h3 {
+        color: #ffffff;
+      }
+
+      .dark-mode .stats p {
+        color: #cccccc;
+      }
+
+      .dark-mode .warning {
+        background: #4a3728;
+        border-color: #6b4423;
+        color: #f4d03f;
+      }
+
+      /* 다크모드 애니메이션 */
+      body,
+      .container,
+      .app-item,
+      .detail-item,
+      .stats {
+        transition: all 0.3s ease;
+      }
+
+      /* 터치 최적화 */
+      .download-btn {
+        min-height: 48px;
+        touch-action: manipulation;
+      }
+
+      .app-item {
+        touch-action: manipulation;
+      }
+
+      /* 로딩 애니메이션 */
+      .app-item {
+        animation: fadeInUp 0.6s ease-out;
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* 스크롤 최적화 */
+      body {
+        -webkit-overflow-scrolling: touch;
+      }
+
+      /* 스크롤 상단 이동 버튼 */
+      .scroll-to-top {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(45deg, #4caf50, #45a049);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        z-index: 1000;
+        opacity: 0;
+        transform: scale(0.8);
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* 공유 토스트 제거됨 */
+
+      .scroll-to-top::before {
+        content: "";
+        width: 0;
+        height: 0;
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        border-bottom: 12px solid white;
+      }
+
+      .scroll-to-top.visible {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      .scroll-to-top:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+      }
+
+      .scroll-to-top:active {
+        transform: scale(0.95);
+      }
+
+      /* 다크모드에서 스크롤 버튼 */
+      .dark-mode .scroll-to-top {
+        background: linear-gradient(45deg, #5cb85c, #449d44);
+        box-shadow: 0 4px 15px rgba(92, 184, 92, 0.3);
+      }
+
+      .dark-mode .scroll-to-top:hover {
+        box-shadow: 0 6px 20px rgba(92, 184, 92, 0.4);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <button
+          class="header-btn refresh-btn"
+          onclick="refreshPage()"
+          id="refreshBtn"
+        >
+          🔄
+        </button>
+
+        <div class="header-content">
+          <h1>🏃‍♂️ 오프아웃 APK</h1>
+          <p>모바일에서 간편하게 다운로드</p>
+        </div>
+
+        <button
+          class="header-btn theme-toggle"
+          onclick="toggleDarkMode()"
+          id="themeToggle"
+        >
+          🌙
+        </button>
+      </div>
+
+      <div class="content">
+        <div class="stats">
+          <h3 id="statsCount">1</h3>
+          <p>사용 가능한 버전</p>
+        </div>
+
+        <div class="tab-container">
+          <div class="tab-buttons">
+            <button
+              class="tab-btn active"
+              onclick="switchTab('dev')"
+              id="devTab"
+            >
+              🛠️ DEV
+              <span class="env-badge dev">개발</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('stg')" id="stgTab">
+              🚀 STG
+              <span class="env-badge stg">스테이징</span>
+            </button>
+          </div>
+
+          <!-- DEV 환경 탭 -->
+          <div class="tab-content active" id="devContent">
+            <div class="app-list">
+              <!-- GENERATED DEV LIST START -->
+              <div class="app-item">
+                <div class="app-header">
+                  <div class="app-icon">🏃‍♂️</div>
+                  <div class="app-info">
+                    <h3>오프아웃 v1.1.89</h3>
+                    <p>최신 개발 버전 (권장)</p>
+                  </div>
+                </div>
+
+                <div class="app-details">
+                  <div class="detail-item">
+                    <div class="detail-label">버전</div>
+                    <div class="detail-value">
+                      <span class="version-badge">v1.1.89</span>
+                    </div>
+                  </div>
+                  <div class="detail-item">
+                    <div class="detail-label">빌드</div>
+                    <div class="detail-value">c120</div>
+                  </div>
+                  <div class="detail-item">
+                    <div class="detail-label">출시일</div>
+                    <div class="detail-value">2025-11-05</div>
+                  </div>
+                  <div class="detail-item">
+                    <div class="detail-label">상태</div>
+                    <div class="detail-value">🟢 최신</div>
+                  </div>
+                </div>
+
+                <a
+                  href="./download/OFFOUT_dev_20251105_c120_v1.1.89_release.apk"
+                  class="download-btn"
+                  download
+                  >다운로드</a
+                >
+              </div>
+              <!-- GENERATED DEV LIST END -->
+            </div>
+          </div>
+
+          <!-- STG 환경 탭 -->
+          <div class="tab-content" id="stgContent">
+            <div class="app-list">
+              <!-- GENERATED STG LIST START -->
+              <div class="app-item">
+                <div class="app-header">
+                  <div class="app-icon">🏃‍♂️</div>
+                  <div class="app-info">
+                    <h3>오프아웃 v1.1.52</h3>
+                    <p>최신 스테이징 버전 (권장)</p>
+                  </div>
+                </div>
+
+                <div class="app-details">
+                  <div class="detail-item">
+                    <div class="detail-label">버전</div>
+                    <div class="detail-value">
+                      <span class="version-badge">v1.1.52</span>
+                    </div>
+                  </div>
+                  <div class="detail-item">
+                    <div class="detail-label">빌드</div>
+                    <div class="detail-value">c82</div>
+                  </div>
+                  <div class="detail-item">
+                    <div class="detail-label">출시일</div>
+                    <div class="detail-value">2025-11-05</div>
+                  </div>
+                  <div class="detail-item">
+                    <div class="detail-label">상태</div>
+                    <div class="detail-value">🟢 최신</div>
+                  </div>
+                </div>
+
+                <a
+                  href="./download/OFFOUT_stg_20251105_c82_v1.1.52_release.apk"
+                  class="download-btn"
+                  download
+                  >다운로드</a
+                >
+              </div>
+              <!-- GENERATED STG LIST END -->
+            </div>
+          </div>
+        </div>
+
+        <div class="warning">
+          설정 → 보안 → 알 수 없는 소스에서 앱 설치를 허용해주세요.
+        </div>
+      </div>
+    </div>
+
+    <!-- 스크롤 상단 이동 버튼 -->
+    <button
+      class="scroll-to-top"
+      id="scrollToTop"
+      onclick="scrollToTop()"
+    ></button>
+
+    <script>
+      // 탭 전환 기능
+      function switchTab(tabName) {
+        // 모든 탭 버튼과 컨텐츠에서 active 클래스 제거
+        document
+          .querySelectorAll(".tab-btn")
+          .forEach((btn) => btn.classList.remove("active"));
+        document
+          .querySelectorAll(".tab-content")
+          .forEach((content) => content.classList.remove("active"));
+
+        // 선택된 탭 활성화
+        document.getElementById(tabName + "Tab").classList.add("active");
+        document.getElementById(tabName + "Content").classList.add("active");
+
+        // 버전 카운트 업데이트 (탭별 자동 계산)
+        const statsCount = document.getElementById("statsCount");
+        const count = document.querySelectorAll(
+          `#${tabName}Content .app-item`
+        ).length;
+        statsCount.textContent = String(count);
+
+        // 햅틱 피드백
+        if (navigator.vibrate) {
+          navigator.vibrate(20);
+        }
+      }
+
+      // 새로고침 기능
+      function refreshPage() {
+        const refreshBtn = document.getElementById("refreshBtn");
+
+        // 버튼 회전 애니메이션
+        refreshBtn.style.animation = "rotateRefresh 0.6s ease-in-out";
+
+        // 햅틱 피드백
+        if (navigator.vibrate) {
+          navigator.vibrate(30);
+        }
+
+        // 잠시 후 페이지 새로고침
+        setTimeout(() => {
+          window.location.reload();
+        }, 300);
+      }
+
+      // 다크모드 토글 기능
+      function toggleDarkMode() {
+        const body = document.body;
+        const toggleBtn = document.getElementById("themeToggle");
+
+        body.classList.toggle("dark-mode");
+
+        // 버튼 아이콘 변경
+        if (body.classList.contains("dark-mode")) {
+          toggleBtn.textContent = "☀️";
+          localStorage.setItem("darkMode", "enabled");
+        } else {
+          toggleBtn.textContent = "🌙";
+          localStorage.setItem("darkMode", "disabled");
+        }
+      }
+
+      // 페이지 로드 시 저장된 테마 적용
+      document.addEventListener("DOMContentLoaded", function () {
+        const darkMode = localStorage.getItem("darkMode");
+        const toggleBtn = document.getElementById("themeToggle");
+
+        // 시스템 다크모드 감지
+        const prefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)"
+        ).matches;
+
+        if (darkMode === "enabled" || (darkMode === null && prefersDark)) {
+          document.body.classList.add("dark-mode");
+          toggleBtn.textContent = "☀️";
+        } else {
+          toggleBtn.textContent = "🌙";
+        }
+      });
+
+      // 시스템 테마 변경 감지
+      window
+        .matchMedia("(prefers-color-scheme: dark)")
+        .addEventListener("change", function (e) {
+          const darkMode = localStorage.getItem("darkMode");
+          if (darkMode === null) {
+            const toggleBtn = document.getElementById("themeToggle");
+            if (e.matches) {
+              document.body.classList.add("dark-mode");
+              toggleBtn.textContent = "☀️";
+            } else {
+              document.body.classList.remove("dark-mode");
+              toggleBtn.textContent = "🌙";
+            }
+          }
+        });
+
+      // 다운로드 클릭 시 햅틱 피드백 (지원 기기에서)
+      document.querySelectorAll(".download-btn").forEach((btn) => {
+        btn.addEventListener("click", function () {
+          if (navigator.vibrate) {
+            navigator.vibrate(50);
+          }
+        });
+      });
+
+      // 스크롤 상단 이동 기능
+      function scrollToTop() {
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        });
+
+        // 햄틱 피드백
+        if (navigator.vibrate) {
+          navigator.vibrate(30);
+        }
+      }
+
+      // 스크롤 위치에 따른 버튼 표시/숨김
+      window.addEventListener("scroll", function () {
+        const scrollToTopBtn = document.getElementById("scrollToTop");
+        const scrollY = window.scrollY || window.pageYOffset;
+
+        if (scrollY > 300) {
+          scrollToTopBtn.classList.add("visible");
+        } else {
+          scrollToTopBtn.classList.remove("visible");
+        }
+      });
+
+      // 터치 이벤트 최적화
+      document.querySelectorAll(".app-item").forEach((item) => {
+        item.addEventListener("touchstart", function () {
+          this.style.transform = "scale(0.98)";
+        });
+
+        item.addEventListener("touchend", function () {
+          this.style.transform = "scale(1)";
+        });
+      });
+
+      // 초기 버전 카운트 설정 (현재 활성 탭 기준)
+      (function initStats() {
+        const activeTabContent = document.querySelector(".tab-content.active");
+        if (!activeTabContent) return;
+        const count = activeTabContent.querySelectorAll(".app-item").length;
+        const statsCount = document.getElementById("statsCount");
+        if (statsCount) statsCount.textContent = String(count);
+      })();
+    </script>
+  </body>
+</html>
